@@ -1,0 +1,10 @@
+contexts:
+- name: my-context
+  provider: github
+  token: your_github_token
+  server: https://github.com
+- name: jenkins-context
+  provider: jenkins
+  token: your_jenkins_token
+  server: https://jenkins.example.com
+current-context: my-context
