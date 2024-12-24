@@ -16,23 +16,6 @@ var configCmd = &cobra.Command{
 	Short: "Manage configuration",
 }
 
-var viewConfigCmd = &cobra.Command{
-	Use:   "view",
-	Short: "View current configuration",
-	Run: func(cmd *cobra.Command, args []string) {
-		cfg, err := config.LoadConfig(configFile)
-		if err != nil {
-			fmt.Println("Error loading config:", err)
-			return
-		}
-		fmt.Printf("Current Profile: %s\n", cfg.CurrentProfile)
-		fmt.Println("Configured Profiles:")
-		for _, profile := range cfg.Profiles {
-			fmt.Printf("- Name: %s, Provider: %s, Server: %s\n", profile.Name, profile.Provider, profile.Server)
-		}
-	},
-}
-
 var useProfileCmd = &cobra.Command{
 	Use:   "use-profile [profile-name]",
 	Short: "Set the current profile",
@@ -77,18 +60,6 @@ var useProfileCmd = &cobra.Command{
 	},
 }
 
-var currentProfileCmd = &cobra.Command{
-	Use:   "current-profile",
-	Short: "Display the current profile",
-	Run: func(cmd *cobra.Command, args []string) {
-		cfg, err := config.LoadConfig(configFile)
-		if err != nil {
-			fmt.Println("Error loading config:", err)
-			return
-		}
-		fmt.Printf("Current Profile: %s\n", cfg.CurrentProfile)
-	},
-}
 var addProfileCmd = &cobra.Command{
 	Use:   "add-profile [name] [provider] [token] [server]",
 	Short: "Add a new profile",
@@ -146,9 +117,10 @@ var removeProfileCmd = &cobra.Command{
 	},
 }
 
-var listProfilesCmd = &cobra.Command{
-	Use:   "list-profiles",
-	Short: "List all profiles",
+// 新的 list 命令
+var listConfigCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List current profile and all configured profiles",
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg, err := config.LoadConfig(configFile)
 		if err != nil {
@@ -156,21 +128,21 @@ var listProfilesCmd = &cobra.Command{
 			return
 		}
 
-		profiles := config.ListProfiles(cfg)
-		fmt.Println("Configured Profiles:")
-		for _, profile := range profiles {
-			fmt.Printf("- Name: %s, Provider: %s, Server: %s\n", profile.Name, profile.Provider, profile.Server)
+		for _, p := range cfg.Profiles {
+			suffix := " "
+			if p.Name == cfg.CurrentProfile {
+				suffix = " (default)"
+			}
+			fmt.Printf("  %s%s\n", p.Name, suffix)
 		}
 	},
 }
 
 func init() {
 	configCmd.PersistentFlags().StringVar(&configFile, "config", "config.yaml", "Path to the config file")
-	configCmd.AddCommand(viewConfigCmd)
 	configCmd.AddCommand(useProfileCmd)
-	configCmd.AddCommand(currentProfileCmd)
 	configCmd.AddCommand(addProfileCmd)
 	configCmd.AddCommand(removeProfileCmd)
-	configCmd.AddCommand(listProfilesCmd)
+	configCmd.AddCommand(listConfigCmd)
 	rootCmd.AddCommand(configCmd)
 }
