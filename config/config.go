@@ -8,11 +8,11 @@ import (
 )
 
 type Config struct {
-	Contexts       []Context `yaml:"contexts"`
-	CurrentContext string    `yaml:"current-context"`
+	Profiles       []Profile `yaml:"profiles"`
+	CurrentProfile string    `yaml:"current-profile"`
 }
 
-type Context struct {
+type Profile struct {
 	Name     string `yaml:"name"`
 	Provider string `yaml:"provider"`
 	Token    string `yaml:"token"`
@@ -43,27 +43,27 @@ func SaveConfig(filePath string, config *Config) error {
 	return os.WriteFile(filePath, data, 0644)
 }
 
-func AddContext(cfg *Config, context Context) error {
-	// 检查上下文是否已经存在
-	for _, ctx := range cfg.Contexts {
-		if ctx.Name == context.Name {
-			return fmt.Errorf("context '%s' already exists", context.Name)
+func AddProfile(cfg *Config, profile Profile) error {
+	// 检查配置文件是否已经存在
+	for _, p := range cfg.Profiles {
+		if p.Name == profile.Name {
+			return fmt.Errorf("profile '%s' already exists", profile.Name)
 		}
 	}
-	cfg.Contexts = append(cfg.Contexts, context)
+	cfg.Profiles = append(cfg.Profiles, profile)
 	return nil
 }
 
-func RemoveContext(cfg *Config, contextName string) error {
-	for i, ctx := range cfg.Contexts {
-		if ctx.Name == contextName {
-			cfg.Contexts = append(cfg.Contexts[:i], cfg.Contexts[i+1:]...)
+func RemoveProfile(cfg *Config, profileName string) error {
+	for i, p := range cfg.Profiles {
+		if p.Name == profileName {
+			cfg.Profiles = append(cfg.Profiles[:i], cfg.Profiles[i+1:]...)
 			return nil
 		}
 	}
-	return fmt.Errorf("context '%s' not found", contextName)
+	return fmt.Errorf("profile '%s' not found", profileName)
 }
 
-func ListContexts(cfg *Config) []Context {
-	return cfg.Contexts
+func ListProfiles(cfg *Config) []Profile {
+	return cfg.Profiles
 }

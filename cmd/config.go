@@ -25,42 +25,42 @@ var viewConfigCmd = &cobra.Command{
 			fmt.Println("Error loading config:", err)
 			return
 		}
-		fmt.Printf("Current Context: %s\n", cfg.CurrentContext)
-		fmt.Println("Configured Contexts:")
-		for _, ctx := range cfg.Contexts {
-			fmt.Printf("- Name: %s, Provider: %s, Server: %s\n", ctx.Name, ctx.Provider, ctx.Server)
+		fmt.Printf("Current Profile: %s\n", cfg.CurrentProfile)
+		fmt.Println("Configured Profiles:")
+		for _, profile := range cfg.Profiles {
+			fmt.Printf("- Name: %s, Provider: %s, Server: %s\n", profile.Name, profile.Provider, profile.Server)
 		}
 	},
 }
 
-var useContextCmd = &cobra.Command{
-	Use:   "use-context [context-name]",
-	Short: "Set the current context",
+var useProfileCmd = &cobra.Command{
+	Use:   "use-profile [profile-name]",
+	Short: "Set the current profile",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		contextName := args[0]
+		profileName := args[0]
 		cfg, err := config.LoadConfig(configFile)
 		if err != nil {
 			fmt.Println("Error loading config:", err)
 			return
 		}
 
-		// 检查上下文是否存在
-		var contextFound bool
-		for _, ctx := range cfg.Contexts {
-			if ctx.Name == contextName {
-				contextFound = true
+		// 检查 profile 是否存在
+		var profileFound bool
+		for _, profile := range cfg.Profiles {
+			if profile.Name == profileName {
+				profileFound = true
 				break
 			}
 		}
 
-		if !contextFound {
-			fmt.Printf("Context '%s' not found\n", contextName)
+		if !profileFound {
+			fmt.Printf("Profile '%s' not found\n", profileName)
 			return
 		}
 
-		// 更新 current-context
-		cfg.CurrentContext = contextName
+		// 更新 current-profile
+		cfg.CurrentProfile = profileName
 		data, err := yaml.Marshal(cfg)
 		if err != nil {
 			fmt.Println("Error marshaling config:", err)
@@ -73,28 +73,28 @@ var useContextCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("Switched to context '%s'\n", contextName)
+		fmt.Printf("Switched to profile '%s'\n", profileName)
 	},
 }
 
-var currentContextCmd = &cobra.Command{
-	Use:   "current-context",
-	Short: "Display the current context",
+var currentProfileCmd = &cobra.Command{
+	Use:   "current-profile",
+	Short: "Display the current profile",
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg, err := config.LoadConfig(configFile)
 		if err != nil {
 			fmt.Println("Error loading config:", err)
 			return
 		}
-		fmt.Printf("Current Context: %s\n", cfg.CurrentContext)
+		fmt.Printf("Current Profile: %s\n", cfg.CurrentProfile)
 	},
 }
-var addContextCmd = &cobra.Command{
-	Use:   "add-context [name] [provider] [token] [server]",
-	Short: "Add a new context",
+var addProfileCmd = &cobra.Command{
+	Use:   "add-profile [name] [provider] [token] [server]",
+	Short: "Add a new profile",
 	Args:  cobra.ExactArgs(4),
 	Run: func(cmd *cobra.Command, args []string) {
-		context := config.Context{
+		profile := config.Profile{
 			Name:     args[0],
 			Provider: args[1],
 			Token:    args[2],
@@ -107,7 +107,7 @@ var addContextCmd = &cobra.Command{
 			return
 		}
 
-		if err := config.AddContext(cfg, context); err != nil {
+		if err := config.AddProfile(cfg, profile); err != nil {
 			fmt.Println(err)
 			return
 		}
@@ -117,13 +117,13 @@ var addContextCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("Added context '%s'\n", context.Name)
+		fmt.Printf("Added profile '%s'\n", profile.Name)
 	},
 }
 
-var removeContextCmd = &cobra.Command{
-	Use:   "remove-context [context-name]",
-	Short: "Remove a context",
+var removeProfileCmd = &cobra.Command{
+	Use:   "remove-profile [profile-name]",
+	Short: "Remove a profile",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg, err := config.LoadConfig(configFile)
@@ -132,7 +132,7 @@ var removeContextCmd = &cobra.Command{
 			return
 		}
 
-		if err := config.RemoveContext(cfg, args[0]); err != nil {
+		if err := config.RemoveProfile(cfg, args[0]); err != nil {
 			fmt.Println(err)
 			return
 		}
@@ -142,13 +142,13 @@ var removeContextCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("Removed context '%s'\n", args[0])
+		fmt.Printf("Removed profile '%s'\n", args[0])
 	},
 }
 
-var listContextsCmd = &cobra.Command{
-	Use:   "list-contexts",
-	Short: "List all contexts",
+var listProfilesCmd = &cobra.Command{
+	Use:   "list-profiles",
+	Short: "List all profiles",
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg, err := config.LoadConfig(configFile)
 		if err != nil {
@@ -156,10 +156,10 @@ var listContextsCmd = &cobra.Command{
 			return
 		}
 
-		contexts := config.ListContexts(cfg)
-		fmt.Println("Configured Contexts:")
-		for _, ctx := range contexts {
-			fmt.Printf("- Name: %s, Provider: %s, Server: %s\n", ctx.Name, ctx.Provider, ctx.Server)
+		profiles := config.ListProfiles(cfg)
+		fmt.Println("Configured Profiles:")
+		for _, profile := range profiles {
+			fmt.Printf("- Name: %s, Provider: %s, Server: %s\n", profile.Name, profile.Provider, profile.Server)
 		}
 	},
 }
@@ -167,10 +167,10 @@ var listContextsCmd = &cobra.Command{
 func init() {
 	configCmd.PersistentFlags().StringVar(&configFile, "config", "config.yaml", "Path to the config file")
 	configCmd.AddCommand(viewConfigCmd)
-	configCmd.AddCommand(useContextCmd)
-	configCmd.AddCommand(currentContextCmd)
-	configCmd.AddCommand(addContextCmd)
-	configCmd.AddCommand(removeContextCmd)
-	configCmd.AddCommand(listContextsCmd)
+	configCmd.AddCommand(useProfileCmd)
+	configCmd.AddCommand(currentProfileCmd)
+	configCmd.AddCommand(addProfileCmd)
+	configCmd.AddCommand(removeProfileCmd)
+	configCmd.AddCommand(listProfilesCmd)
 	rootCmd.AddCommand(configCmd)
 }
